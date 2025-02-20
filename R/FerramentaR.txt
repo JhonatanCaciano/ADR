@@ -1,0 +1,229 @@
+
+------------------------------------
+
+# Carregando os arquivos CSV
+
+data_rip_menor - read.csv(RIP_menor.csv)
+data_rip_maior - read.csv(RIP_maior.csv)
+data_ospf_menor - read.csv(OSPF_menor.csv)
+data_ospf_maior - read.csv(OSPF_maior.csv)
+data_eigrp_menor - read.csv(EIGRP_menor.csv)
+data_eigrp_maior - read.csv(EIGRP_maior.csv)
+
+# Visualizando as primeiras linhas de um arquivo
+head(data_rip_menor)
+
+# Checando nomes das colunas
+colnames(data_rip_menor)
+
+# Função para converter as colunas para valores numéricos, removendo unidades
+convert_to_numeric <- function(data, col_name, unit) {
+  # Remover unidades e converter para numérico
+  data[[col_name]] <- as.numeric(gsub(unit, "", data[[col_name]]))
+  return(data)
+}
+
+# Função para calcular média, desvio padrão e intervalo de confiança
+calc_stats <- function(data, col_name) {
+  mean_val <- mean(data[[col_name]], na.rm = TRUE)
+  sd_val <- sd(data[[col_name]], na.rm = TRUE)
+  
+  # Calcular intervalo de confiança de 95%
+  t_test <- t.test(data[[col_name]], conf.level = 0.95)
+  conf_int <- t_test$conf.int
+  
+  return(list(mean = mean_val, sd = sd_val, conf_int = conf_int))
+}
+
+# Definir as métricas que queremos calcular
+metrics <- c("Transfer", "Bandwidth", "Jitter", "Loss", "Delay.ms.", "Convergence.s.")
+
+# Converter as colunas de texto para numérico para todos os datasets
+data_rip_menor <- convert_to_numeric(data_rip_menor, "Transfer", " MBytes")
+data_rip_menor <- convert_to_numeric(data_rip_menor, "Bandwidth", " Kbits/sec")
+data_rip_menor <- convert_to_numeric(data_rip_menor, "Jitter", " ms")
+data_rip_menor <- convert_to_numeric(data_rip_menor, "Loss", " %")
+data_rip_menor <- convert_to_numeric(data_rip_menor, "Delay.ms.", "")
+data_rip_menor <- convert_to_numeric(data_rip_menor, "Convergence.s.", "")
+
+data_rip_maior <- convert_to_numeric(data_rip_maior, "Transfer", " MBytes")
+data_rip_maior <- convert_to_numeric(data_rip_maior, "Bandwidth", " Kbits/sec")
+data_rip_maior <- convert_to_numeric(data_rip_maior, "Jitter", " ms")
+data_rip_maior <- convert_to_numeric(data_rip_maior, "Loss", " %")
+data_rip_maior <- convert_to_numeric(data_rip_maior, "Delay.ms.", "")
+data_rip_maior <- convert_to_numeric(data_rip_maior, "Convergence.s.", "")
+
+data_ospf_menor <- convert_to_numeric(data_ospf_menor, "Transfer", " MBytes")
+data_ospf_menor <- convert_to_numeric(data_ospf_menor, "Bandwidth", " Kbits/sec")
+data_ospf_menor <- convert_to_numeric(data_ospf_menor, "Jitter", " ms")
+data_ospf_menor <- convert_to_numeric(data_ospf_menor, "Loss", " %")
+data_ospf_menor <- convert_to_numeric(data_ospf_menor, "Delay.ms.", "")
+data_ospf_menor <- convert_to_numeric(data_ospf_menor, "Convergence.s.", "")
+
+data_ospf_maior <- convert_to_numeric(data_ospf_maior, "Transfer", " MBytes")
+data_ospf_maior <- convert_to_numeric(data_ospf_maior, "Bandwidth", " Kbits/sec")
+data_ospf_maior <- convert_to_numeric(data_ospf_maior, "Jitter", " ms")
+data_ospf_maior <- convert_to_numeric(data_ospf_maior, "Loss", " %")
+data_ospf_maior <- convert_to_numeric(data_ospf_maior, "Delay.ms.", "")
+data_ospf_maior <- convert_to_numeric(data_ospf_maior, "Convergence.s.", "")
+
+data_eigrp_menor <- convert_to_numeric(data_eigrp_menor, "Transfer", " MBytes")
+data_eigrp_menor <- convert_to_numeric(data_eigrp_menor, "Bandwidth", " Kbits/sec")
+data_eigrp_menor <- convert_to_numeric(data_eigrp_menor, "Jitter", " ms")
+data_eigrp_menor <- convert_to_numeric(data_eigrp_menor, "Loss", " %")
+data_eigrp_menor <- convert_to_numeric(data_eigrp_menor, "Delay.ms.", "")
+data_eigrp_menor <- convert_to_numeric(data_eigrp_menor, "Convergence.s.", "")
+
+data_eigrp_maior <- convert_to_numeric(data_eigrp_maior, "Transfer", " MBytes")
+data_eigrp_maior <- convert_to_numeric(data_eigrp_maior, "Bandwidth", " Kbits/sec")
+data_eigrp_maior <- convert_to_numeric(data_eigrp_maior, "Jitter", " ms")
+data_eigrp_maior <- convert_to_numeric(data_eigrp_maior, "Loss", " %")
+data_eigrp_maior <- convert_to_numeric(data_eigrp_maior, "Delay.ms.", "")
+data_eigrp_maior <- convert_to_numeric(data_eigrp_maior, "Convergence.s.", "")
+
+# Calcular as estatísticas para RIP e topologia menor
+rip_menor_stats <- lapply(metrics, function(m) calc_stats(data_rip_menor, m))
+
+# Calcular as estatísticas para RIP e topologia maior
+rip_maior_stats <- lapply(metrics, function(m) calc_stats(data_rip_maior, m))
+
+# Calcular as estatísticas para OSPF e topologia menor
+ospf_menor_stats <- lapply(metrics, function(m) calc_stats(data_ospf_menor, m))
+
+# Calcular as estatísticas para OSPF e topologia maior
+ospf_maior_stats <- lapply(metrics, function(m) calc_stats(data_ospf_maior, m))
+
+# Calcular as estatísticas para EIGRP e topologia menor
+eigrp_menor_stats <- lapply(metrics, function(m) calc_stats(data_eigrp_menor, m))
+
+# Calcular as estatísticas para EIGRP e topologia maior
+eigrp_maior_stats <- lapply(metrics, function(m) calc_stats(data_eigrp_maior, m))
+
+# Exibir as estatísticas para a primeira métrica (Transferência) do RIP em topologia menor
+rip_menor_stats[[1]]
+
+# Se ainda não tiver a biblioteca instalada
+install.packages("ggplot2")
+library(ggplot2)
+
+# Função para gerar gráficos de intervalo de confiança
+generate_ic_plot <- function(data, col_name, protocol, topology) {
+  # Calcular a média e o intervalo de confiança
+  stats <- calc_stats(data, col_name)
+  
+  # Extrair os valores
+  mean_val <- stats$mean
+  lower_ci <- stats$conf_int[1]
+  upper_ci <- stats$conf_int[2]
+  
+  # Criar um dataframe para o gráfico
+  plot_data <- data.frame(
+    Protocol = protocol,
+    Topology = topology,
+    Metric = col_name,
+    Mean = mean_val,
+    Lower_CI = lower_ci,
+    Upper_CI = upper_ci
+  )
+  
+  # Gerar o gráfico de intervalo de confiança
+  ggplot(plot_data, aes(x = Metric, y = Mean, ymin = Lower_CI, ymax = Upper_CI)) +
+    geom_point() + 
+    geom_errorbar(width = 0.1) + 
+    labs(title = paste("Intervalo de Confiança de 95% para", protocol, "-", topology),
+         x = "Métrica", y = "Valor") +
+    theme_minimal()
+}
+
+# Gerar gráficos para a métrica "Convergence.s." em todas as combinações de protocolos/topologias
+for (protocol in c("RIP", "OSPF", "EIGRP")) {
+  for (topology in c("Menor", "Maior")) {
+    data_name <- paste("data_", tolower(protocol), "_", tolower(topology), sep = "")
+    data <- get(data_name)
+    generate_ic_plot(data, "Convergence.s.", protocol, topology)
+  }
+}
+
+# Função para calcular a média de atraso para cada protocolo e topologia
+calc_mean_delay <- function(data) {
+  mean(data$`Delay.ms.`, na.rm = TRUE)
+}
+
+# Criando um dataframe com as médias de atraso
+delay_data <- data.frame(
+  Protocol = character(),
+  Topology = character(),
+  Mean_Delay = numeric()
+)
+
+# Adicionar médias de atraso para cada protocolo e topologia
+for (protocol in c("RIP", "OSPF", "EIGRP")) {
+  for (topology in c("Menor", "Maior")) {
+    data_name <- paste("data_", tolower(protocol), "_", tolower(topology), sep = "")
+    data <- get(data_name)
+    mean_delay <- calc_mean_delay(data)
+    delay_data <- rbind(delay_data, data.frame(Protocol = protocol, Topology = topology, Mean_Delay = mean_delay))
+  }
+}
+
+# Gerar o gráfico de barras para a média de atraso
+ggplot(delay_data, aes(x = interaction(Protocol, Topology), y = Mean_Delay, fill = Protocol)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  labs(title = "Média de Atraso por Protocolo e Topologia",
+       x = "Protocolo e Topologia", y = "Média de Atraso (ms)") +
+  theme_minimal() +
+  scale_fill_manual(values = c("RIP" = "skyblue", "OSPF" = "orange", "EIGRP" = "green")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotaciona os rótulos do eixo X
+
+# Função para calcular o intervalo de confiança
+calc_ic_loss <- function(data) {
+  # Calcular a média
+  mean_loss <- mean(data$Loss, na.rm = TRUE)
+  
+  # Calcular o erro padrão
+  stderr_loss <- sd(data$Loss, na.rm = TRUE) / sqrt(length(data$Loss))
+  
+  # Calcular o intervalo de confiança de 95%
+  error_margin_loss <- qnorm(0.975) * stderr_loss
+  ic_lower_loss <- mean_loss - error_margin_loss
+  ic_upper_loss <- mean_loss + error_margin_loss
+  
+  return(c(mean_loss, ic_lower_loss, ic_upper_loss))
+}
+
+# Criando um dataframe para armazenar a média e IC da perda de pacotes
+loss_data <- data.frame(
+  Protocol = character(),
+  Topology = character(),
+  Mean_Loss = numeric(),
+  IC_Lower = numeric(),
+  IC_Upper = numeric()
+)
+
+# Adicionar médias de perda de pacotes e intervalos de confiança para cada protocolo e topologia
+for (protocol in c("RIP", "OSPF", "EIGRP")) {
+  for (topology in c("Menor", "Maior")) {
+    data_name <- paste("data_", tolower(protocol), "_", tolower(topology), sep = "")
+    data <- get(data_name)
+    ic_loss <- calc_ic_loss(data)
+    loss_data <- rbind(loss_data, data.frame(
+      Protocol = protocol,
+      Topology = topology,
+      Mean_Loss = ic_loss[1],
+      IC_Lower = ic_loss[2],
+      IC_Upper = ic_loss[3]
+    ))
+  }
+}
+
+# Gerar o gráfico de barras para a média de perda de pacotes com intervalo de confiança
+ggplot(loss_data, aes(x = interaction(Protocol, Topology), y = Mean_Loss, fill = Protocol)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = IC_Lower, ymax = IC_Upper), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Média de Perda de Pacotes por Protocolo e Topologia",
+       x = "Protocolo e Topologia", y = "Média de Perda de Pacotes (%)") +
+  theme_minimal() +
+  scale_fill_manual(values = c("RIP" = "skyblue", "OSPF" = "orange", "EIGRP" = "green")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotaciona os rótulos do eixo X
+
+
